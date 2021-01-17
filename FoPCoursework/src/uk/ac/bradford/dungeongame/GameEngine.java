@@ -141,7 +141,6 @@ public class GameEngine {
      */
     private TileType[][] generateLevel() {
         //Add your code here to build a 2D array containing TileType values to create a level
-        int lavaPlaced = 0;
         // Place stairs in the level
         int select1 = rng.nextInt(DUNGEON_WIDTH - 2);
         select1 += 1;
@@ -170,10 +169,10 @@ public class GameEngine {
                 if (rng.nextDouble() <= WALL_CHANCE && tiles[i][j] != TileType.STAIRS && tiles[i][j] != TileType.CHEST) {
                 tiles[i][j] = TileType.WALL;
                 }
+                // Spawns lava in the level
                 if (rng.nextDouble() <= lavaChance && tiles[i][j] != TileType.STAIRS && tiles[i][j] != TileType.CHEST && tiles[i][j] != TileType.WALL) {
                     tiles[i][j] = TileType.LAVA;
                 }
-
                 // Place floor tile if the tile is not occupied.
                 if (tiles[i][j] == null) {
                     tiles[i][j] = TileType.FLOOR;
@@ -201,10 +200,10 @@ public class GameEngine {
         //Add code here to find tiles in the level array that are suitable spawn points
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
-                if (tiles[i][j] == TileType.FLOOR){
+                if (tiles[i][j] == TileType.FLOOR){ // If a current tile is a floor
                     Point p = new Point(i, j);
-                    s.add(p);
-                    Collections.shuffle(s);
+                    s.add(p); // Add Point in the ArrayList
+                    Collections.shuffle(s); // Shuffle the ArrayList
 
                 }
             }
@@ -228,15 +227,15 @@ public class GameEngine {
     private Entity[] spawnMonsters() {
 
         int monsterNum = depth;
-        if (depth > MAX_MONSTERS) {
+        if (depth > MAX_MONSTERS) { // Limits the number of monsters that can spawn
             monsterNum = MAX_MONSTERS;
         }
-        Entity[] m = new Entity[monsterNum];
+        Entity[] m = new Entity[monsterNum]; // Creates an array which holds monsters
         for (int i = 0; i < m.length; i++) {
-            Point p = spawns.get(i);
+            Point p = spawns.get(i); // Takes a Point from spawns ArrayList
             Entity monster = new Entity(50 + depth, p.x, p.y, EntityType.MONSTER);
-            m[i] = monster;
-            Collections.shuffle(spawns);
+            m[i] = monster; // Add monster entity to the Array
+            Collections.shuffle(spawns); // Shuffles spawns
         }
         return m;    //Should be changed to return an array of monsters instead of null
     }
@@ -249,9 +248,9 @@ public class GameEngine {
      * @return An Entity object representing the player in the game
      */
     private Entity spawnPlayer() {
-        Point Point = spawns.get(0);
+        Point Point = spawns.get(0); // Uses spawns to get a floor tile to spawn to.
         Entity player = new Entity(100, Point.x, Point.y, Entity.EntityType.PLAYER);
-        spawns.remove(spawns.get(0));
+        spawns.remove(spawns.get(0)); // Removes the spawn point from spawns so monsters don't spawn in the same location
         Collections.shuffle(spawns);
         return player; //Should be changed to return an Entity (the player) instead of null
     }
@@ -272,19 +271,19 @@ public class GameEngine {
             if (monster != null) {
                 if (player.getX() - 1 == monster.getX() && player.getY() == monster.getY()) { // If monster is to the left of the player coordinates
                     hitMonster(monster);
-                    if (tiles[monster.getX() - 1][monster.getY()] != TileType.WALL) {
-                        monster.setPosition(monster.getX() - 1, monster.getY());
+                    if (tiles[monster.getX() - 1][monster.getY()] != TileType.WALL) { // If there is no wall to the left of the player
+                        monster.setPosition(monster.getX() - 1, monster.getY()); // Move the monster to the left
                         }
                     }
             }
         }
 
-        if (tiles[player.getX() - 1][player.getY()] == TileType.STAIRS) {
+        if (tiles[player.getX() - 1][player.getY()] == TileType.STAIRS) { // If stairs are to the left
+            player.setPosition(player.getX() - 1, player.getY()); // Go left
+        }else if (tiles[player.getX() - 1][player.getY()] == TileType.CHEST) { // If there is a chest to the left
+            tiles[player.getX() - 1][player.getY()] = TileType.CHESTOPEN; // Change chest to chest open
             player.setPosition(player.getX() - 1, player.getY());
-        }else if (tiles[player.getX() - 1][player.getY()] == TileType.CHEST) {
-            tiles[player.getX() - 1][player.getY()] = TileType.CHESTOPEN;
-            player.setPosition(player.getX() - 1, player.getY());
-            if (rng.nextDouble() <= damageChance) {
+            if (rng.nextDouble() <= damageChance) { // 50% chance that the player will get damage increase or more health when stepped on a chest
                 damage -= 3;
                 System.out.println("Damage has been increased, damage is: " + damage);
             }else {
@@ -292,12 +291,13 @@ public class GameEngine {
                 System.out.println("Player health increased, health is: " + player.getHealth());
             }
 
-        }else if (tiles[player.getX() - 1][player.getY()] == TileType.LAVA) {
+        }else if (tiles[player.getX() - 1][player.getY()] == TileType.LAVA) { // If there is a lava tile to the left
             player.setPosition(player.getX()- 1, player.getY());
-            player.changeHealth(-10);
+            player.changeHealth(-10); // Damage the player
             System.out.println("Player stepped in lava! Health remaining: " + player.getHealth());
 
         }
+        // If it's a floor tile move left
         else if (tiles[player.getX() - 1][player.getY()] == TileType.FLOOR || tiles[player.getX() - 1][player.getY()] == TileType.CHESTOPEN) {
             player.setPosition(player.getX() - 1, player.getY());
         }
@@ -325,21 +325,21 @@ public class GameEngine {
 
         for (Entity monster : monsters) {
             if (monster != null) {
-                if (player.getX() + 1 == monster.getX() && player.getY() == monster.getY()) {
+                if (player.getX() + 1 == monster.getX() && player.getY() == monster.getY()) { // If a monster is to the right
                     hitMonster(monster);
-                    if (tiles[monster.getX() + 1][monster.getY()] != TileType.WALL) {
-                        monster.setPosition(monster.getX() + 1, monster.getY());
+                    if (tiles[monster.getX() + 1][monster.getY()] != TileType.WALL) { // If there is no wall to the right
+                        monster.setPosition(monster.getX() + 1, monster.getY()); // Move monster right
                     }
                 }
             }
         }
 
-        if (tiles[player.getX() + 1][player.getY()] == TileType.STAIRS) {
+        if (tiles[player.getX() + 1][player.getY()] == TileType.STAIRS) { // If stairs are to the right
+            player.setPosition(player.getX() + 1, player.getY()); // move right
+        }else if (tiles[player.getX() + 1][player.getY()] == TileType.CHEST) { // If chest is to the right
+            tiles[player.getX() + 1][player.getY()] = TileType.CHESTOPEN; // Change tile to right into chest open
             player.setPosition(player.getX() + 1, player.getY());
-        }else if (tiles[player.getX() + 1][player.getY()] == TileType.CHEST) {
-            tiles[player.getX() + 1][player.getY()] = TileType.CHESTOPEN;
-            player.setPosition(player.getX() + 1, player.getY());
-            if (rng.nextDouble() <= damageChance) {
+            if (rng.nextDouble() <= damageChance) { // 50% chance that the player will get damage increase or more health when stepped on a chest
                 damage -= 3;
                 System.out.println("Damage has been increased, damage is: " + damage);
             }else {
@@ -347,12 +347,14 @@ public class GameEngine {
                 System.out.println("Player health increased, health is: " + player.getHealth());
             }
 
-        }else if (tiles[player.getX() + 1][player.getY()] == TileType.LAVA) {
+        }else if (tiles[player.getX() + 1][player.getY()] == TileType.LAVA) { // If lava is to the right
             player.setPosition(player.getX() + 1, player.getY());
-            player.changeHealth(-10);
+            player.changeHealth(-10); // damage player
             System.out.println("Player stepped in lava! Health remaining: " + player.getHealth());
 
-        }else if (tiles[player.getX() + 1][player.getY()] == TileType.FLOOR || tiles[player.getX() + 1][player.getY()] == TileType.CHESTOPEN) {
+        }
+        // If there is a floor or chest tile to the right move there
+        else if (tiles[player.getX() + 1][player.getY()] == TileType.FLOOR || tiles[player.getX() + 1][player.getY()] == TileType.CHESTOPEN) {
             player.setPosition(player.getX() + 1, player.getY());
         }
 
@@ -371,10 +373,10 @@ public class GameEngine {
     public void movePlayerUp() {
         for (Entity monster : monsters) {
             if (monster != null) {
-                if (player.getX() == monster.getX() && player.getY() - 1 == monster.getY()) {
+                if (player.getX() == monster.getX() && player.getY() - 1 == monster.getY()) { // If there is a monster above
                     hitMonster(monster);
-                    if (tiles[monster.getX()][monster.getY() - 1] != TileType.WALL) {
-                        monster.setPosition(monster.getX(), monster.getY() - 1);
+                    if (tiles[monster.getX()][monster.getY() - 1] != TileType.WALL) { // If there is no wall above
+                        monster.setPosition(monster.getX(), monster.getY() - 1); // Move the monster above
                     }
 
 
@@ -382,12 +384,12 @@ public class GameEngine {
             }
         }
 
-        if (tiles[player.getX()][player.getY() - 1] == TileType.STAIRS) {
+        if (tiles[player.getX()][player.getY() - 1] == TileType.STAIRS) { // If stairs are above move there
             player.setPosition(player.getX(), player.getY() - 1);
-        }else if (tiles[player.getX()][player.getY() - 1] == TileType.CHEST) {
-            tiles[player.getX()][player.getY() - 1] = TileType.CHESTOPEN;
+        }else if (tiles[player.getX()][player.getY() - 1] == TileType.CHEST) { // If a chest is above move there
+            tiles[player.getX()][player.getY() - 1] = TileType.CHESTOPEN; // Change the tile into chest open
             player.setPosition(player.getX(), player.getY() - 1);
-            if (rng.nextDouble() <= damageChance) {
+            if (rng.nextDouble() <= damageChance) { // 50% chance that the player will get damage increase or more health when stepped on a chest
                 damage -= 3;
                 System.out.println("Damage has been increased, damage is: " + damage);
             }else {
@@ -395,12 +397,14 @@ public class GameEngine {
                 System.out.println("Player health increased, health is: " + player.getHealth());
             }
 
-        }else if (tiles[player.getX()][player.getY() - 1] == TileType.LAVA) {
+        }else if (tiles[player.getX()][player.getY() - 1] == TileType.LAVA) { // If it's lava above damage the player
             player.setPosition(player.getX(), player.getY() - 1);
             player.changeHealth(-10);
             System.out.println("Player stepped in lava! Health remaining: " + player.getHealth());
 
-        }else if (tiles[player.getX()][player.getY() - 1] == TileType.FLOOR || tiles[player.getX()][player.getY() - 1] == TileType.CHESTOPEN) {
+        }
+        // If it's a floor or chest tile move there
+        else if (tiles[player.getX()][player.getY() - 1] == TileType.FLOOR || tiles[player.getX()][player.getY() - 1] == TileType.CHESTOPEN) {
             player.setPosition(player.getX(), player.getY() - 1);
         }
 
@@ -422,10 +426,10 @@ public class GameEngine {
     public void movePlayerDown() {
         for (Entity monster : monsters) {
             if (monster != null) {
-                if (player.getX() == monster.getX() && player.getY() + 1 == monster.getY()) {
+                if (player.getX() == monster.getX() && player.getY() + 1 == monster.getY()) { // If there is a monster below the player
                     hitMonster(monster);
-                    if (tiles[monster.getX()][monster.getY() + 1] != TileType.WALL) {
-                        monster.setPosition(monster.getX(), monster.getY() + 1);
+                    if (tiles[monster.getX()][monster.getY() + 1] != TileType.WALL) { // If there is no wall bellow
+                        monster.setPosition(monster.getX(), monster.getY() + 1); // Move the monster down
                     }
 
 
@@ -433,12 +437,12 @@ public class GameEngine {
             }
         }
 
-        if (tiles[player.getX()][player.getY() + 1] == TileType.STAIRS) {
+        if (tiles[player.getX()][player.getY() + 1] == TileType.STAIRS) { // If the stairs are bellow move there
             player.setPosition(player.getX(), player.getY() + 1);
-        }else if (tiles[player.getX()][player.getY() + 1] == TileType.CHEST) {
-            tiles[player.getX()][player.getY() + 1] = TileType.CHESTOPEN;
+        }else if (tiles[player.getX()][player.getY() + 1] == TileType.CHEST) { // If a chest is bellow
+            tiles[player.getX()][player.getY() + 1] = TileType.CHESTOPEN; // Change the tile into chest open
             player.setPosition(player.getX(), player.getY() + 1);
-            if (rng.nextDouble() <= damageChance) {
+            if (rng.nextDouble() <= damageChance) { // 50% chance that the player will get damage increase or more health when stepped on a chest
                 damage -= 2;
                 System.out.println("Damage has been increased, damage is: " + damage);
             }else {
@@ -446,12 +450,14 @@ public class GameEngine {
                 System.out.println("Player health increased, health is: " + player.getHealth());
             }
 
-        }else if (tiles[player.getX()][player.getY() + 1] == TileType.LAVA) {
+        }else if (tiles[player.getX()][player.getY() + 1] == TileType.LAVA) { // If the tile bellow is lava damage the player
             player.setPosition(player.getX(), player.getY() + 1);
             player.changeHealth(-10);
             System.out.println("Player stepped in lava! Health remaining: " + player.getHealth());
 
-        }else if (tiles[player.getX()][player.getY() + 1] == TileType.FLOOR || tiles[player.getX()][player.getY() + 1] == TileType.CHESTOPEN) {
+        }
+        // If it's a floor or chest tile go there
+        else if (tiles[player.getX()][player.getY() + 1] == TileType.FLOOR || tiles[player.getX()][player.getY() + 1] == TileType.CHESTOPEN) {
             player.setPosition(player.getX(), player.getY() + 1);
         }
 
@@ -474,8 +480,8 @@ public class GameEngine {
      * elements in the monsters array and calls the moveMonster method for each one.
      */
     private void moveMonsters() {
-        for (Entity mon : monsters) {
-            if (mon != null) {
+        for (Entity mon : monsters) { // for every monster
+            if (mon != null) { // if the monster is not dead move it
                 moveMonster(mon);
 
             }
@@ -488,16 +494,16 @@ public class GameEngine {
      * @param m The Entity (monster) that needs to be moved
      */
     private void moveMonster(Entity m) {
-        Collections.shuffle(spawns);
-        Point p = spawns.get(0);
+        Collections.shuffle(spawns); // Shuffles spawns array list
+        Point p = spawns.get(0); // Takes Point from spawns
         int monX = m.getX();
         int monY = m.getY();
 
         for (Entity monster : monsters) {
             if (monster != null) {
                 if (m.getX() - 1 == monster.getX() && m.getY() == monster.getY()) { // Check if there is monster in the tile to the left
-                    if (tiles[m.getX() + 1][m.getY()] != TileType.WALL){
-                        m.setPosition(m.getX() + 1, m.getY());
+                    if (tiles[m.getX() + 1][m.getY()] != TileType.WALL){ // If there is no wall to the left
+                        m.setPosition(m.getX() + 1, m.getY()); // Move the monster to  the
                     }else {
                         m.setPosition(p.x, p.y);
                     }
@@ -514,9 +520,9 @@ public class GameEngine {
                         m.setPosition(p.x, p.y);
                     }
                 } else if (m.getX() == monster.getX() && m.getY() + 1 == monster.getY()) { // Check if there is monster in the tile below
-                    if (tiles[m.getX()][m.getY() - 1] != TileType.WALL){
+                    if (tiles[m.getX()][m.getY() - 1] != TileType.WALL) {
                         m.setPosition(m.getX() - 1, m.getY());
-                    }else {
+                    } else {
                         m.setPosition(p.x, p.y);
                     }
                 }
@@ -525,45 +531,48 @@ public class GameEngine {
 
 
             // Check if the player is adjacent if so don't change position.
-            if (m.getX() - 1 == player.getX() && m.getY() == player.getY()) {
+            if (m.getX() - 1 == player.getX() && m.getY() == player.getY()) { // Left
                 m.setPosition(m.getX(), m.getY());
                 return;
-            } else if (m.getX() + 1 == player.getX() && m.getY() == player.getY()) {
+            } else if (m.getX() + 1 == player.getX() && m.getY() == player.getY()) { // Right
                 m.setPosition(m.getX(), m.getY());
                 return;
-            } else if (m.getX() == player.getX() && m.getY() - 1 == player.getY()) {
+            } else if (m.getX() == player.getX() && m.getY() - 1 == player.getY()) { // Above
                 m.setPosition(m.getX(), m.getY());
                 return;
-            } else if (m.getX() == player.getX() && m.getY() + 1 == player.getY()) {
+            } else if (m.getX() == player.getX() && m.getY() + 1 == player.getY()) { // Bellow
                 m.setPosition(m.getX(), m.getY());
                 return;
             }
 
-
-            if (tiles[m.getX() - 1][m.getY()] == TileType.FLOOR || tiles[m.getX() - 1][m.getY()] == TileType.LAVA) { // LEFT
+            // Checks if the tile to the left is a floor or lava.
+            if (tiles[m.getX() - 1][m.getY()] == TileType.FLOOR || tiles[m.getX() - 1][m.getY()] == TileType.LAVA) {
                 if (m.getX() > player.getX()) {
-                    m.setPosition(m.getX() - 1, m.getY());
+                    m.setPosition(m.getX() - 1, m.getY()); // moves left
                     if (tiles[m.getX()][m.getY()] == TileType.LAVA) {
-                        hitMonster(m);
+                        hitMonster(m); // Hits monster if walked into lava
                     }
                 }
             }
-            if (tiles[m.getX() + 1][m.getY()] == TileType.FLOOR || tiles[m.getX() + 1][m.getY()] == TileType.LAVA) { // RIGHT
+            // Checks if the tile to the right is a floor or lava
+            if (tiles[m.getX() + 1][m.getY()] == TileType.FLOOR || tiles[m.getX() + 1][m.getY()] == TileType.LAVA) {
                 if (m.getX() < player.getX()) {
-                    m.setPosition(m.getX() + 1, m.getY());
+                    m.setPosition(m.getX() + 1, m.getY()); // Moves right
                     if (tiles[m.getX()][m.getY()] == TileType.LAVA) {
                         hitMonster(m);
                     }
                 }
             }
-            if (tiles[m.getX()][m.getY() - 1] == TileType.FLOOR || tiles[m.getX()][m.getY() - 1] == TileType.LAVA) { // Up
+            // Checks if the tile above is a floor or lava
+            if (tiles[m.getX()][m.getY() - 1] == TileType.FLOOR || tiles[m.getX()][m.getY() - 1] == TileType.LAVA) {
                 if (m.getY() > player.getY()) {
-                    m.setPosition(m.getX(), m.getY() - 1);
+                    m.setPosition(m.getX(), m.getY() - 1); // Moves up
                     if (tiles[m.getX()][m.getY()] == TileType.LAVA) {
                         hitMonster(m);
                     }
                 }
             }
+            // Checks if the tile bellow is a floor or lava
             if (tiles[m.getX()][m.getY() + 1] == TileType.FLOOR || tiles[m.getX()][m.getY() + 1] == TileType.LAVA) { // down
                 if (m.getY() < player.getY()) {
                     m.setPosition(m.getX(), m.getY() + 1);
@@ -572,8 +581,8 @@ public class GameEngine {
                     }
                 }
             }
-            if (m.getX() == player.getX() && m.getY() == player.getY()) { // Attack player
-                hitPlayer();
+            if (m.getX() == player.getX() && m.getY() == player.getY()) { // If coordinates are the same as the player
+                hitPlayer(); // Hit player
                 m.setPosition(p.x, p.y); // Teleport to random floor tile
             }
 
@@ -583,14 +592,17 @@ public class GameEngine {
                 // If there is a wall to the left
                 if (tiles[m.getX() - 1][m.getY()] == TileType.WALL || tiles[m.getX() - 1][m.getY()] == TileType.STAIRS) {
                     if (m.getX() > player.getX()) {
+                        // Checks above the monster if there is no wall, checks if above to the left is a floor tile and if there is no wall ahead.
                         if (tiles[m.getX()][m.getY() - 1] != TileType.WALL && tiles[m.getX() - 1][m.getY() - 1] == TileType.FLOOR && tiles[m.getX() - 2][m.getY() - 1] != TileType.WALL) {
                             m.setPosition(m.getX() - 1, m.getY() - 1);
-                            return;
-                        } else if (tiles[m.getX()][m.getY() + 1] != TileType.WALL && tiles[m.getX() - 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() - 2][m.getY() + 1] != TileType.WALL) {
+                            return; // break from the method
+                        }
+                        // Checks below the monster if there is no wall, checks if below to the left is a floor tile and if there is no wall ahead.
+                        else if (tiles[m.getX()][m.getY() + 1] != TileType.WALL && tiles[m.getX() - 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() - 2][m.getY() + 1] != TileType.WALL) {
                             m.setPosition(m.getX() - 1, m.getY() + 1);
                             return;
                         } else {
-                            m.setPosition(p.x, p.y);
+                            m.setPosition(p.x, p.y); // Teleports to a random position if surrounded by walls or can't find a place to walk to.
                         }
                     }
 
@@ -599,14 +611,17 @@ public class GameEngine {
                 // If there is a wall to the right
                 if (tiles[m.getX() + 1][m.getY()] == TileType.WALL || tiles[m.getX() + 1][m.getY()] == TileType.STAIRS) {
                     if (m.getX() < player.getX()) {
+                        // Checks above the monster if there is no wall, checks if above to the right is a floor tile and if there is no wall ahead.
                         if (tiles[m.getX()][m.getY() - 1] != TileType.WALL && tiles[m.getX() + 1][m.getY() - 1] == TileType.FLOOR && tiles[m.getX() + 2][m.getY() - 1] != TileType.WALL) {
                             m.setPosition(m.getX() + 1, m.getY() - 1);
                             return;
-                        } else if (tiles[m.getX()][m.getY() + 1] != TileType.WALL && tiles[m.getX() + 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() + 2][m.getY() + 1] != TileType.WALL) {
+                        }
+                        // Checks below the monster if there is no wall, checks if below to the right is a floor tile and if there is no wall ahead.
+                        else if (tiles[m.getX()][m.getY() + 1] != TileType.WALL && tiles[m.getX() + 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() + 2][m.getY() + 1] != TileType.WALL) {
                             m.setPosition(m.getX() + 1, m.getY() + 1);
                             return;
                         } else {
-                            m.setPosition(p.x, p.y);
+                            m.setPosition(p.x, p.y); // Teleports to a random position if surrounded by walls or can't find a place to walk to.
                         }
                     }
 
@@ -614,26 +629,32 @@ public class GameEngine {
                 // if there is a wall above
                 if (tiles[m.getX()][m.getY() - 1] == TileType.WALL || tiles[m.getX()][m.getY() - 1] == TileType.STAIRS) {
                     if (m.getY() > player.getY()) {
+                        // Checks to the left of the monster if there is no wall, checks if above to the left is a floor tile and if there is no wall ahead.
                         if (tiles[m.getX() - 1][m.getY()] != TileType.WALL && tiles[m.getX() - 1][m.getY() - 1] == TileType.FLOOR && tiles[m.getX() - 1][m.getY() - 2] != TileType.WALL) {
                             m.setPosition(m.getX() - 1, m.getY() - 1);
                             return;
-                        } else if (tiles[m.getX() + 1][m.getY()] != TileType.WALL && tiles[m.getX() + 1][m.getY() - 1] == TileType.FLOOR && tiles[m.getX() + 1][m.getY() - 2] != TileType.WALL) {
+                        }
+                        // Checks to the right of the monster if there is no wall, checks if below to the right is a floor tile and if there is no wall ahead.
+                        else if (tiles[m.getX() + 1][m.getY()] != TileType.WALL && tiles[m.getX() + 1][m.getY() - 1] == TileType.FLOOR && tiles[m.getX() + 1][m.getY() - 2] != TileType.WALL) {
                             m.setPosition(m.getX() + 1, m.getY() - 1);
                             return;
                         } else {
-                            m.setPosition(p.x, p.y);
+                            m.setPosition(p.x, p.y); // Teleports to a random position if surrounded by walls or can't find a place to walk to.
                         }
                     }
                 }
                 // if there is a wall below.
                 if (tiles[m.getX()][m.getY() + 1] == TileType.WALL || tiles[m.getX()][m.getY() + 1] == TileType.STAIRS) {
                     if (m.getY() < player.getY()) {
+                        // Checks to the left of the monster if there is no wall, checks if below to the left is a floor tile and if there is no wall ahead.
                         if (tiles[m.getX() - 1][m.getY()] != TileType.WALL && tiles[m.getX() - 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() - 1][m.getY() + 2] != TileType.WALL) {
                             m.setPosition(m.getX() - 1, m.getY() + 1);
-                        } else if (tiles[m.getX() + 1][m.getY()] != TileType.WALL && tiles[m.getX() + 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() + 1][m.getY() + 2] != TileType.WALL) {
+                        }
+                        // Checks to the right of the monster if there is no wall, checks if below to the right is a floor tile and if there is no wall ahead.
+                        else if (tiles[m.getX() + 1][m.getY()] != TileType.WALL && tiles[m.getX() + 1][m.getY() + 1] == TileType.FLOOR && tiles[m.getX() + 1][m.getY() + 2] != TileType.WALL) {
                             m.setPosition(m.getX() + 1, m.getY() + 1);
                         } else {
-                            m.setPosition(p.x, p.y);
+                            m.setPosition(p.x, p.y); // Teleports to a random position if surrounded by walls or can't find a place to walk to.
                         }
                     }
                 }
@@ -661,8 +682,8 @@ public class GameEngine {
      */
     private void cleanDeadMonsters() {
         
-        for (int i = 0; i < monsters.length; i++) {
-            if (monsters[i] != null) {
+        for (int i = 0; i < monsters.length; i++) { // Check all monsters
+            if (monsters[i] != null) { // If a monster is not dead
                 if (monsters[i].getHealth() <= 0) {
                 monsters[i] = null;
                 }
@@ -681,13 +702,13 @@ public class GameEngine {
      * should not be created here unless the health of the player should be reset.
      */
     private void descendLevel() {
-        depth += 1;
+        depth += 1; // Increments depth by 1
         System.out.println("The depth is " + depth);
-        tiles = new TileType[DUNGEON_WIDTH][DUNGEON_HEIGHT];
-        tiles = generateLevel();
-        spawns = getSpawns();
-        monsters = spawnMonsters();
-        placePlayer();
+        tiles = new TileType[DUNGEON_WIDTH][DUNGEON_HEIGHT]; // Resets the tile Array
+        tiles = generateLevel(); // Calls the generate level method
+        spawns = getSpawns(); // Takes spawn locations again
+        monsters = spawnMonsters(); // Spawns monsters
+        placePlayer(); // Places the player to a random location in the dungeon
 
         
     }
@@ -700,9 +721,8 @@ public class GameEngine {
      * x and y values of the Point taken from the spawns ArrayList.
      */
     private void placePlayer() {
-        getSpawns();
-        int select1 = rng.nextInt(spawns.size());
-        Point p = spawns.get(select1);
+        int select1 = rng.nextInt(spawns.size()); // Takes random value from the spawns
+        Point p = spawns.get(select1); // Creates a point spawns
         player.setPosition(p.x, p.y);
     }
 
