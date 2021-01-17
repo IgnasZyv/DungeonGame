@@ -47,18 +47,18 @@ public class GameEngine {
      * of the dungeon. This attribute can be used to fix the size of an array
      * (or similar) that will store monsters.
      */
-    public static int MAX_MONSTERS = 5;
+    public static int MAX_MONSTERS = 4;
 
 
-    public int damage = - 10;
+    public int damage = - 10; // Player damage
     /**
      * The chance of a wall being generated instead of a floor when generating
      * the level. 1.0 is 100% chance, 0.0 is 0% chance.
      */
     public final static double WALL_CHANCE = 0.2;
-    public final static double lavaChance = 0.01;
+    public final static double lavaChance = 0.01; // Chance for lava to spawn
 
-    public final double damageChance = 0.5;
+    public final double damageChance = 0.5; // Chance to receive the damage boost
 
     /**
      * A random number generator that can be used to include randomised choices
