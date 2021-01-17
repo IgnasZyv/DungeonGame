@@ -56,7 +56,7 @@ public class GameEngine {
      * the level. 1.0 is 100% chance, 0.0 is 0% chance.
      */
     public final static double WALL_CHANCE = 0.2;
-    public final static double lavaChance = 0.02;
+    public final static double lavaChance = 0.01;
 
     public final double damageChance = 0.5;
 
@@ -68,7 +68,7 @@ public class GameEngine {
      * giving you the same numbers each time you run the program. Remove
      * the seed value if you want different results each game.
      */
-    private Random rng = new Random(2);
+    private Random rng = new Random();
 
     /**
      * The current level number for the dungeon. As the player moves down stairs
@@ -170,9 +170,8 @@ public class GameEngine {
                 if (rng.nextDouble() <= WALL_CHANCE && tiles[i][j] != TileType.STAIRS && tiles[i][j] != TileType.CHEST) {
                 tiles[i][j] = TileType.WALL;
                 }
-                if (rng.nextDouble() <= lavaChance && lavaPlaced != 4 && tiles[i][j] == null || tiles[i][j] == TileType.FLOOR) {
+                if (rng.nextDouble() <= lavaChance && tiles[i][j] != TileType.STAIRS && tiles[i][j] != TileType.CHEST && tiles[i][j] != TileType.WALL) {
                     tiles[i][j] = TileType.LAVA;
-                    lavaPlaced += 1;
                 }
 
                 // Place floor tile if the tile is not occupied.
